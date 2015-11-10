@@ -1,0 +1,16 @@
+.git
+.gitignore
+LICENSE
+VERSION
+README.md
+Changelog.md
+Makefile
+env
+*.log
+.idea
+docker-compose.yml
+
+node_modules
+!node_modules/babel-core
+
+config.json
