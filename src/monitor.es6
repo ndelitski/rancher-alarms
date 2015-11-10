@@ -1,17 +1,9 @@
 import _, {pairs, defaults, padRight, invoke} from 'lodash';
 import Target from './notifications/target';
-import {info, trace} from './log';
+import {info, trace, error} from './log';
 import assert from 'assert';
-import Promise from 'bluebird';
-
-Promise.config({
-  // Enable warnings.
-  warnings: true,
-  // Enable long stack traces.
-  longStackTraces: true,
-  // Enable cancellation.
-  cancellation: true
-});
+import {delay} from 'bluebird';
+import y from 'yield';
 
 class StateRingBuffer {
   get length() {
@@ -34,6 +26,15 @@ class StateRingBuffer {
   }
   join(sym) {
     return this._arr.join(sym)
+  }
+  toString() {
+    let str = '[';
+    const delimeter = ' ';
+    for (var i = 0, len = this._arr.length; i < len; i++) {
+      str += (this._arr[i] || '?') + (i !== this._arr.length - 1 ? delimeter : '')
+    }
+    str += ']';
+    return str;
   }
 }
 
@@ -62,7 +63,6 @@ export default class ServiceStateMonitor {
     this._rancher = rancherClient;
     this._unhealtyStatesBuffer = new StateRingBuffer(this.healthcheck.unhealthyThreshold);
     this._healtyStatesBuffer = new StateRingBuffer(this.healthcheck.healthyThreshold);
-
     if (targets) {
       this.setupNotificationsTargets(targets)
     }
@@ -77,8 +77,9 @@ export default class ServiceStateMonitor {
 
   notifyNonActiveState(oldState, newState) {
     for (let target of this._targets) {
-      target.notify(`service ${padRight(this.name, 15)} become ${newState}
-      ${this._rancher.buildUrl(`/apps/${this.service.environmentId}/services/${this.service.id}/containers`)}
+      target.notify(`service ${padRight(this.name, 15)} become ${newState}(${this.service.state})
+service: ${this._rancher.buildUrl(`/apps/${this.service.environmentId}/services/${this.service.id}/containers`)}
+stack: ${this._rancher.buildUrl(`/apps/${this.service.environmentId}`)}
       `)
     }
   }
@@ -88,7 +89,7 @@ export default class ServiceStateMonitor {
     this.state = state;
     this._unhealtyStatesBuffer.push(state);
     this._healtyStatesBuffer.push(state);
-    trace(`${this.name} buffers: ${this._healtyStatesBuffer.join(',')} ${this._unhealtyStatesBuffer.join(',')}`);
+    trace(`${this.name} buffers:\n \thealthy: ${this._healtyStatesBuffer} \n\tunhealthy: ${this._unhealtyStatesBuffer}`);
   }
 
   updateState(newState) {
@@ -115,7 +116,7 @@ export default class ServiceStateMonitor {
 
     (async () => {
       while (!this._pollCanceled) {
-        await Promise.delay(this.healthcheck.pollInterval);
+        await delay(this.healthcheck.pollInterval);
         await this._tick();
       }
     })();
@@ -127,12 +128,13 @@ export default class ServiceStateMonitor {
     this.service = await this._rancher.getService(this.service.id);
     trace(`poll ${this.name}`);
 
-    if (this.service.state !== 'active') {
-      newState = this.service.state;
-    } else {
+    if (this.service.state == 'updating-active') {
+      newState = 'degraded';
+    } else if (this.service.state == 'active') {
       if (this.service.launchConfig && this.service.launchConfig.healthCheck) {
         const containers = await this._rancher.getServiceContainers(this.service.id);
-        const hasUnhealthyContainers = _(containers)
+
+        const hasUnhealthyContainers = _(this._withoutSidekicks(containers))
           .filter((c) => c.state == 'running')
           .some((c) => (c.healthState !== 'healthy'));
 
@@ -140,9 +142,48 @@ export default class ServiceStateMonitor {
       } else {
         newState = 'active';
       }
+    } else {
+      newState = this.service.state;
     }
 
     this.updateState(newState);
+  }
+
+  _withoutSidekicks(containers) {
+    return containers.filter(({name}) => name.split('_').length <= 3 );
+    //const byDeployUnit = {};
+    //let results = [];
+    //
+    //for (let container of containers) {
+    //  let unit;
+    //  if (unit = container.labels['io.rancher.service.deployment.unit']) {
+    //    if (!byDeployUnit[unit]) {
+    //      byDeployUnit[unit] = [container]
+    //    } else {
+    //      byDeployUnit[unit].push(container);
+    //    }
+    //  }
+    //}
+    //
+    //for (let [unitId, unitContainers] of pairs(byDeployUnit)) {
+    //  const sidekicks = _(unitContainers)
+    //    .map((c) => c.labels['io.rancher.sidekicks'] && c.labels['io.rancher.sidekicks'].split(','))
+    //    .compact()
+    //    .flatten()
+    //    .uniq();
+    //
+    //  results = results.concat(unitContainers.filter(({name}) => {
+    //    const re = new RegExp(`${this.stackName}_${this.service.name}_(.*)_\\d`);
+    //    const match = name.match(re);
+    //    if (!match) {
+    //      error(`failed to extract container_name from ${name} with regex ${re}`)
+    //    }
+    //    const serviceName = match && match[1];
+    //    info(`serviceName ${serviceName} extracted from ${name}`);
+    //    return sidekicks.indexOf(serviceName) == -1;
+    //  }));
+    //}
+    //return results;
   }
 
   stop() {
@@ -153,8 +194,7 @@ export default class ServiceStateMonitor {
   }
 
   toString() {
-    return `
-${this.name}:
+    return `${this.name}:
   targets: ${stringify(invoke(this._targets, 'toString').join(''))}
   healthcheck: ${stringify(this.healthcheck)}
 `

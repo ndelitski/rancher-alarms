@@ -1,7 +1,7 @@
 import RancherClient from './rancher';
 import resolveConfig from './config';
 import ServiceHealthMonitor from './monitor';
-import {keys, pluck, find, invoke, pairs, extend, merge, values} from 'lodash';
+import {isArray, some, keys, pluck, find, invoke, pairs, extend, merge, values} from 'lodash';
 import {info, trace, error} from './log';
 import Promise, {all} from 'bluebird';
 import assert from 'assert';
@@ -9,13 +9,17 @@ import assert from 'assert';
 (async () => {
   const config = await resolveConfig();
   assert(config.pollServicesInterval, '`pollServicesInterval` is missing');
+  if (config.filter) {
+    assert(isArray(config.filter), '`filters` should be of type Array');
+  }
   const rancher = new RancherClient(config.rancher);
-  const services = (await rancher.getServices()).filter(runningServicePredicate);
-
   const stacksById = (await rancher.getStacks()).reduce((map, {name, id}) => {
     map[id] = name;
     return map;
   }, {});
+  const services = (await rancher.getServices())
+    .filter(globalServiceFilterPredicate)
+    .filter(runningServicePredicate);
 
   const monitors = await all(services.map(initServiceMonitor));
 
@@ -26,19 +30,10 @@ import assert from 'assert';
 
   invoke(values(monitors), 'start');
 
-  let updateMonitorsCancel;
-
-  while(!updateMonitorsCancel) {
+  while(true) {
     await Promise.delay(config.pollServicesInterval);
     await updateMonitors();
   }
-
-  process
-    .on('SIGINT', stopPolling)
-    //.on('SIGKILL', () => {
-    //  clearInterval(polling);
-    //})
-    .on('SIGTERM', stopPolling);
 
   async function initServiceMonitor(service) {
     const {name, environmentId} = service;
@@ -63,7 +58,7 @@ import assert from 'assert';
   }
 
   async function updateMonitors() {
-    const availableServices = await rancher.getServices();
+    const availableServices = (await rancher.getServices()).filter(globalServiceFilterPredicate);
     const monitoredServices = pluck(monitors, 'service');
     trace(`updating monitors`);
 
@@ -92,19 +87,28 @@ import assert from 'assert';
     }
   }
 
-  function stopPolling() {
-    updateMonitorsCancel = false;
-    for (let m of values(monitors)) {
-      m.stop();
-    }
-  }
-
   /**
    * Should we monitor this service?
    * @param service
      */
   function runningServicePredicate(service) {
-    return ['active', 'upgraded', 'upgrading'].indexOf(service.state) !== -1;
+    return ['active', 'upgraded', 'upgrading', 'updating-active'].indexOf(service.state) !== -1;
+  }
+
+  function globalServiceFilterPredicate(service) {
+    const fullName = stacksById[service.environmentId] + '/' + service.name;
+
+    if (config.filter) {
+      const matched = some(config.filter, (f) => fullName.match(new RegExp(f)));
+
+      if (matched) {
+        return true;
+      } else {
+        trace(`${fullName} ignored due to global filter setup('filter' config option)`)
+      }
+    } else {
+      return true;
+    }
   }
 
 })();

@@ -33,7 +33,7 @@ export default class EmailTarget extends NotificationTarget {
 
   async notify(message) {
     all(this._recipients).map((to) => {
-      //info(`sent email notification to ${to} ${info}`);
+      info(`sending email notification to ${to}`);
       return this._sender.sendMailAsync({
         from: this._smtpSettings.from,
         to,
@@ -46,10 +46,7 @@ export default class EmailTarget extends NotificationTarget {
   }
 
   toString() {
-    return `
-email:
-  recipients: ${this._recipients}
-  smtp: ${this._smtpSettings}
-    `
+    return `email:
+  recipients: ${this._recipients}`
   }
 }

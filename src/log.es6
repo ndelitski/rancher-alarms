@@ -31,7 +31,7 @@ function log(severity, ...args) {
   if (severity == 'error') {
     method = 'error';
   } else if (severity == 'trace') {
-    method = 'debug';
+    method = 'log';
   } else if (severity == 'info') {
     method = 'log';
   } else {
