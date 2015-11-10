@@ -8,6 +8,7 @@ import assert from 'assert';
 
 (async () => {
   const config = await resolveConfig();
+  info(`started with config:\n${JSON.stringify(config, null, 4)}`);
   assert(config.pollServicesInterval, '`pollServicesInterval` is missing');
   if (config.filter) {
     assert(isArray(config.filter), '`filters` should be of type Array');

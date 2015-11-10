@@ -80,7 +80,7 @@ async function envSource() {
             password: ALARM_EMAIL_PASS
           },
           "host": ALARM_EMAIL_SMTP_HOST,
-          "secureConnection": ALARM_EMAIL_SSL,
+          "secureConnection": ALARM_EMAIL_SSL || true,
           "port": ALARM_EMAIL_SMTP_PORT || 465
         }
       }
