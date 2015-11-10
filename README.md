@@ -22,31 +22,27 @@ docker run \
     ndelitski/rancher-alarms:0.1.0
 ```
 
-## Deploy to rancher
+### Docker compose
 
 ```yml
-alarms:
+rancher-alarms:
   image: ndelitski/rancher-alarms:0.1.0
   environment:
     RANCHER_ADDRESS: rancher.yourdomain.com
     RANCHER_ACCESS_KEY: AccessKEY
     RANCHER_SECRET_KEY: SECRETkey
     RANCHER_PROJECT_ID: i8a
-    ALARM_EMAIL_ADDRESSES: john@snow.com,john@doe.com
-    ALARM_EMAIL_USER: john@snow.com
+    ALARM_EMAIL_ADDRESSES: arya@stark.com,john@snow.com
+    ALARM_EMAIL_USER: alarm@nightwatch.com
     ALARM_EMAIL_PASS: nightWatch
     ALARM_EMAIL_SMTP_HOST: smtp.snow.com
-    ALARM_EMAIL_FROM: Alarm of Night Watch
+    ALARM_EMAIL_FROM: 'Alarm of a Night Watch <alarm@nightwatch.com>'
   tty: true
-  stdin_open: true
-  labels:
-    io.rancher.container.hostname_override: container_name
 ```
-
 
 ## How it works
 
-On startup get a list of services and instantiate healthcheck monitor for each of them if it is in a running state. Removed, purged and etc services will be ignored
+On startup get a list of services and instantiate healthcheck monitor for each of them if service is in a running state. Removed, purged and etc services will be ignored
 
 List of healthcheck monitors is updated with `pollServicesInterval` interval. When service is removed it will be no longer be monitored.
 
