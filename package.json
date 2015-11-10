@@ -2,7 +2,7 @@
   "name": "rancher-alarms",
   "version": "0.1.0",
   "description": "Will kick your ass if found unhealthy service in a Rancher environment",
-  "main": "index.js",
+  "main": "bin/rancher-alarms.js",
   "scripts": {
     "start": "node bin/rancher-alarms.js",
     "test": "echo \"Error: no test specified\" && exit 1",
