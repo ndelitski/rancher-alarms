@@ -11,13 +11,20 @@ version_default=latest
 container_name=$image
 
 build() {
+  local tg=$1
   docker build --pull --rm -t ${image} ./
+  tag $tg
 }
 
 push() {
   local version=${1:-$version_default}
-  docker tag -f ${image} ${repo}/${image}:${version}
+  tag $version
   docker push ${repo}/${image}:${version}
+}
+
+tag() {
+    local tg=$1
+    docker tag -f ${image} ${repo}/${image}:${tg}
 }
 
 check_state() {
@@ -48,10 +55,13 @@ run() {
 
 case "$1" in
   'build')
-    build
+    build ${@:2}
     ;;
   'run')
     run
+    ;;
+  'tag')
+    tag ${@:2}
     ;;
   'push')
     push ${@:2}
