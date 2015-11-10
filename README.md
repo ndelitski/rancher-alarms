@@ -2,7 +2,7 @@
 
 Send notifications when something goes wrong in rancher
 
-### PLEASE NOTE: Project in under a heavy development
+### PLEASE NOTE: Project is under a heavy development
 
 ## Features
  - Will kick your ass when service state is not okay
@@ -126,6 +126,7 @@ When service become degraded state all targets will be invoked to process notifi
     
 ## Roadmap
  - Simplify configuration
+ - Support for rancher-metadata backend when running inside Rancher environment
  - More notifications mechanisms: http, sms
  - Test coverage
  - Notify when all services operate normal after some of them was in degraded state
