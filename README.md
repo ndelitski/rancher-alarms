@@ -5,11 +5,11 @@ Send notifications when something goes wrong in rancher
 ### PLEASE NOTE: Project in under a heavy development
 
 ## Features
- - Will kick your ass when service state is not okaaay
+ - Will kick your ass when service state is not okay
  - Various notification mechanisms
    - email
    - and more will be later...
- - Flexible configuration
+ - Configure notification mechanisms globally or on a per service level
 
 ## Run in Docker
 
@@ -48,9 +48,9 @@ alarms:
 
 On startup get a list of services and instantiate healthcheck monitor for each of them if it is in a running state. Removed, purged and etc services will be ignored
 
-List of healthcheck monitors is updated with `pollServicesInterval` interval. When service is removed it will be no longer monitored.
+List of healthcheck monitors is updated with `pollServicesInterval` interval. When service is removed it will be no longer be monitored.
 
-When service become in degraded state all targets will be invoked to process notification.
+When service become degraded state all targets will be invoked to process notification.
 
 ## Configuration 
 ```json
@@ -128,5 +128,11 @@ When service become in degraded state all targets will be invoked to process not
 ### Supported notification targets
  - email
     
+## Roadmap
+ - Simplify configuration
+ - More notifications mechanisms: http, sms
+ - Test coverage
+ - Notify when all services operate normal after some of them was in degraded state
+ - Refactor notifications 
  
    
