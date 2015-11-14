@@ -134,7 +134,7 @@ When service become degraded state all targets will be invoked to process notifi
 ## Roadmap
  - Simplify configuration.
  - More use of rancher labels and metadata. Alternate configuration through rancher labels/metadata(can be used in a conjunction with initial config).
- - Run in a rancher environment as an agent with a new label `agent: true`
+ - Run in a rancher environment as an agent with a new label `agent: true`. No need to specify keys anymore!
  - More notifications mechanisms: AWS SNS, http, sms
  - Better email template
  - Test coverage. Setup drone.io
