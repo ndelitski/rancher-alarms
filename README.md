@@ -28,7 +28,7 @@ docker run \
 rancher-alarms:
   image: ndelitski/rancher-alarms:0.1.0
   environment:
-    RANCHER_ADDRESS: rancher.yourdomain.com
+    RANCHER_ADDRESS: rancher.yourdomain.com[:port]
     RANCHER_ACCESS_KEY: AccessKEY
     RANCHER_SECRET_KEY: SECRETkey
     RANCHER_PROJECT_ID: i8a
@@ -44,7 +44,7 @@ rancher-alarms:
 
 On startup get a list of services and instantiate healthcheck monitor for each of them if service is in a running state. Removed, purged and etc services will be ignored
 
-List of healthcheck monitors is updated with `pollServicesInterval` interval. When service is removed it will be no longer be monitored.
+List of healthcheck monitors is updated with `pollServicesInterval` interval. When service is removed it will be no longer monitored.
 
 When service become degraded state all targets will be invoked to process notification.
 
@@ -113,23 +113,30 @@ When service become degraded state all targets will be invoked to process notifi
 ```
 
 ### Sections
- - `rancher` Rancher API settings
- - `pollServicesInterval` interval in ms on which list of services will be refetched from server
- - `filter` filter for stack/services names in environment. Optional
- - `notifications` per service notification settings. Wildcard means any service
-    - `healtcheck`
-    - `targets` what targets to use. will override base target settings in global `target` section
- - `targets` base settings for notification targets
+ - `rancher` Rancher API settings. `required`
+ - `pollServicesInterval` interval in ms of fetching list of services. `required`.
+ - `filter` whitelist filter for stack/services names in environment. List of string values. Every string is a RegExp expression so you can use something like this to match all stack services `frontend/*`. `optional`
+ - `notifications` per service notification settings. Wildcard means any service `required`
+    - `healtcheck` monitoring state options. `optional` defaults are:
+    ```js
+    {
+      pollInterval: 5000,
+      healthyThreshold: 2,
+      unhealthyThreshold: 3
+    }
+    ```
+    - `targets` what notification targets to use. Will override base target settings in a root `targets` section. Currently each target must be an Object value. If you have nothing to override from a base settings just place `{}` as a value. `optional`
+ - `targets` base settings for each notification target. `required`
 
 ### Supported notification targets
  - email
     
 ## Roadmap
- - Simplify configuration
- - Support for rancher-metadata backend when running inside Rancher environment
- - More notifications mechanisms: http, sms
- - Test coverage
- - Notify when all services operate normal after some of them was in degraded state
- - Refactor notifications 
- 
-   
+ - Simplify configuration.
+ - More use of rancher labels and metadata. Alternate configuration through rancher labels/metadata(can be used in a conjunction with initial config).
+ - Run in a rancher environment as an agent with a new label `agent: true`
+ - More notifications mechanisms: AWS SNS, http, sms
+ - Better email template
+ - Test coverage. Setup drone.io
+ - Notify when all services operate normal after some of them were in a degraded state
+ - Refactor notifications
