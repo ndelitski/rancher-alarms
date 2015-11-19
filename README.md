@@ -2,8 +2,6 @@
 
 Send notifications when something goes wrong in rancher
 
-### PLEASE NOTE: Project is under a heavy development
-
 ## Features
  - Will kick your ass when service state is not okay
  - Various notification mechanisms
