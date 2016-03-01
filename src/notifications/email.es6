@@ -14,16 +14,19 @@ export default class EmailTarget extends NotificationTarget {
     assert(smtp.host);
     assert(smtp.port);
     assert(smtp.from);
-    assert(smtp.auth);
-    assert(smtp.auth.user);
-    assert(smtp.auth.password);
+
+    if (smtp.auth) {
+      assert(smtp.auth.user);
+      assert(smtp.auth.password);
+    }
+
     this._recipients = recipients;
     this._smtpSettings = smtp;
     this._sender = promisifyAll(nodemailer.createTransport({
       port: smtp.port,
       host: smtp.host,
       from: smtp.from,
-      auth: {
+      auth: smtp.auth && {
         user: smtp.auth.user,
         pass: smtp.auth.password
       },
