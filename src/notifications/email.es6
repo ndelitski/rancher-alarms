@@ -10,14 +10,14 @@ export default class EmailTarget extends NotificationTarget {
     super();
     assert(recipients, '`recipients` is missing');
     assert(isArray(recipients), '`recipients` expected as array of email');
-    assert(smtp);
-    assert(smtp.host);
-    assert(smtp.port);
-    assert(smtp.from);
+    assert(smtp, '`smtp` is missing');
+    assert(smtp.host, '`smtp.host` is missing');
+    assert(smtp.port, '`smtp.port` is missing');
+    assert(smtp.from, '`smtp.from` is missing');
 
     if (smtp.auth) {
-      assert(smtp.auth.user);
-      assert(smtp.auth.password);
+      assert(smtp.auth.user, '`smtp.auth.user` is missing');
+      assert(smtp.auth.password, '`smtp.auth.password` is missing');
     }
 
     this._recipients = recipients;
