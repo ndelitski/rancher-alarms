@@ -46,6 +46,15 @@ async function envSource() {
     ALARM_MONITOR_UNHEALTHY_THRESHOLD
   } = process.env;
 
+  let emailAuth;
+
+  if (ALARM_EMAIL_USER || ALARM_EMAIL_PASS) {
+   emailAuth = {
+     user: ALARM_EMAIL_USER,
+     password: ALARM_EMAIL_PASS
+   }
+  }
+
   return {
     rancher: {
       address: RANCHER_ADDRESS,
@@ -75,10 +84,7 @@ async function envSource() {
       email: {
         smtp: {
           from: ALARM_EMAIL_FROM,
-          auth: {
-            user: ALARM_EMAIL_USER,
-            password: ALARM_EMAIL_PASS
-          },
+          auth: emailAuth,
           "host": ALARM_EMAIL_SMTP_HOST,
           "secureConnection": ALARM_EMAIL_SSL || true,
           "port": ALARM_EMAIL_SMTP_PORT || 465
