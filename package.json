@@ -1,6 +1,6 @@
 {
   "name": "rancher-alarms",
-  "version": "0.1.1-0",
+  "version": "0.1.1",
   "description": "Will kick your ass if found unhealthy service in a Rancher environment",
   "main": "bin/rancher-alarms.js",
   "scripts": {
