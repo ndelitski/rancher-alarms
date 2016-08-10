@@ -77,9 +77,16 @@ export default class ServiceStateMonitor {
 
   notifyNonActiveState(oldState, newState) {
     for (let target of this._targets) {
-      target.notify(`service ${padRight(this.name, 15)} become ${newState}(${this.service.state})
-service: ${this._rancher.buildUrl(`/apps/${this.service.environmentId}/services/${this.service.id}/containers`)}
-stack: ${this._rancher.buildUrl(`/apps/${this.service.environmentId}`)}
+      let {
+        state,
+        name,
+        accountId: envId,
+        environmentId: stackId,
+        id: serviceId,
+      } = this.service;
+      target.notify(`service ${padRight(name, 15)} become ${newState}(${state})
+service: ${this._rancher.buildUrl(`/env/${envId}/apps/stacks/${stackId}/services/${serviceId}/containers`)}
+stack: ${this._rancher.buildUrl(`/env/${envId}/apps/stacks/${stackId}`)}
       `)
     }
   }
