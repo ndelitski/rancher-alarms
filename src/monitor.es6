@@ -10,7 +10,7 @@ class StateRingBuffer {
     return this._arr.length;
   }
   constructor(length) {
-    this._arr = new Array(length);
+    this._arr = Array.apply( null, { length: length } );
   }
   push(state) {
     this._arr.shift();
