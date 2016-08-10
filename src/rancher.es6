@@ -59,6 +59,12 @@ export default class RancherClient {
     });
   }
 
+  async getStack(stackId) {
+    return await this._request({
+      url: `/v1/projects/${this.projectId}/environments/${stackId}`
+    });
+  }
+
   async getServiceContainers(serviceId) {
     return (await this._request({
       url: `/v1/projects/${this.projectId}/services/${serviceId}/instances`

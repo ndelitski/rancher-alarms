@@ -4,6 +4,12 @@ import {isArray} from 'lodash';
 import {info} from '../log';
 import nodemailer from 'nodemailer';
 import {all, promisifyAll} from 'bluebird';
+import renderTemplate from '../render-template';
+
+const EMAIL_TEMPLATE = `service #{serviceName} become #{monitorState} (#{state})
+service: #{serviceUrl}
+stack: #{stackUrl}
+`;
 
 export default class EmailTarget extends NotificationTarget {
   constructor({recipients, smtp}) {
@@ -34,7 +40,9 @@ export default class EmailTarget extends NotificationTarget {
     }));
   }
 
-  async notify(message) {
+  async notify(data) {
+    let message = renderTemplate(EMAIL_TEMPLATE, data);
+
     all(this._recipients).map((to) => {
       info(`sending email notification to ${to}`);
       return this._sender.sendMailAsync({

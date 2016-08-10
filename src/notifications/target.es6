@@ -1,7 +1,7 @@
 import {info} from '../log';
 import assert from 'assert';
 
-const VALID_TARGETS = ['email'];
+const VALID_TARGETS = ['email', 'slack'];
 
 export default class NotificationTarget {
   async notify(message) {
