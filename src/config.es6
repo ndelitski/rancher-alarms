@@ -41,11 +41,16 @@ async function envSource() {
     ALARM_EMAIL_SMTP_HOST,
     ALARM_EMAIL_SMTP_PORT,
     ALARM_EMAIL_FROM,
+    ALARM_EMAIL_TEMPLATE,
+    ALARM_EMAIL_TEMPLATE_FILE,
     ALARM_MONITOR_INTERVAL,
     ALARM_MONITOR_HEALTHY_THRESHOLD,
     ALARM_MONITOR_UNHEALTHY_THRESHOLD,
     ALARM_SLACK_WEBHOOK_URL,
-    ALARM_SLACK_WEBHOOK_CHANNEL
+    ALARM_SLACK_CHANNEL,
+    ALARM_SLACK_BOTNAME,
+    ALARM_SLACK_TEMPLATE,
+    ALARM_SLACK_TEMPLATE_FILE,
   } = process.env;
 
   let emailAuth;
@@ -90,11 +95,16 @@ async function envSource() {
           "host": ALARM_EMAIL_SMTP_HOST,
           "secureConnection": ALARM_EMAIL_SSL || true,
           "port": ALARM_EMAIL_SMTP_PORT || 465
-        }
+        },
+        template: ALARM_EMAIL_TEMPLATE,
+        templateFile: ALARM_EMAIL_TEMPLATE_FILE
       },
       slack: ALARM_SLACK_WEBHOOK_URL && {
         webhookUrl: ALARM_SLACK_WEBHOOK_URL,
-        channel: ALARM_SLACK_WEBHOOK_CHANNEL,
+        channel: ALARM_SLACK_CHANNEL,
+        botName: ALARM_SLACK_BOTNAME,
+        template: ALARM_SLACK_TEMPLATE,
+        templateFile: ALARM_SLACK_TEMPLATE_FILE
       }
     }
   }

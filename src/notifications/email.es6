@@ -10,9 +10,10 @@ const EMAIL_TEMPLATE = `service #{serviceName} become #{monitorState} (#{state})
 service: #{serviceUrl}
 stack: #{stackUrl}
 `;
+const DEFAULT_SUBJECT = 'Unhealth service alarm';
 
 export default class EmailTarget extends NotificationTarget {
-  constructor({recipients, smtp}) {
+  constructor({recipients, smtp, template, textTemplate, htmlTemplate, subject = DEFAULT_SUBJECT}) {
     super();
     assert(recipients, '`recipients` is missing');
     assert(isArray(recipients), '`recipients` expected as array of email');
@@ -38,19 +39,28 @@ export default class EmailTarget extends NotificationTarget {
       },
       secure: smtp.secureConnection
     }));
+
+    this._textTemplate = textTemplate || EMAIL_TEMPLATE;
+    this._htmlTemplate = template || htmlTemplate;
+    this._subject = subject;
   }
 
   async notify(data) {
-    let message = renderTemplate(EMAIL_TEMPLATE, data);
-
     all(this._recipients).map((to) => {
-      info(`sending email notification to ${to}`);
-      return this._sender.sendMailAsync({
+      let mail = {
         from: this._smtpSettings.from,
         to,
-        subject: 'Unhealth service alarm',
-        text: message
-      }).then((result)=> {
+        subject: this._subject,
+      };
+
+      if (this._htmlTemplate) {
+        mail.html = renderTemplate(this._htmlTemplate, data)
+      } else {
+        mail.text = renderTemplate(this._textTemplate, data)
+      }
+
+      info(`sending email notification to ${to}`);
+      return this._sender.sendMailAsync(mail).then((result)=> {
         info(`sent email notification to ${to} ${JSON.stringify(result, null, 4)}`)
       });
     }, {concurrency: 5});

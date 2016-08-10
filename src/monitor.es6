@@ -4,6 +4,8 @@ import {info, trace, error} from './log';
 import assert from 'assert';
 import {delay} from 'bluebird';
 import y from 'yield';
+import fs from 'fs';
+import path from 'path';
 
 class StateRingBuffer {
   get length() {
@@ -44,7 +46,7 @@ export default class ServiceStateMonitor {
     return this.stackName.toLowerCase() + '/' + this.service.name.toLowerCase();
   }
 
-  constructor({targets, service, stackName, rancherClient, healthcheck}) {
+  constructor({targets, templates, service, stackName, rancherClient, healthcheck}) {
     assert(service, '`service` is missing');
     assert(service.name, '`service.name` is missing');
     assert(stackName, '`stackName` is missing');
@@ -63,6 +65,8 @@ export default class ServiceStateMonitor {
     this._rancher = rancherClient;
     this._unhealtyStatesBuffer = new StateRingBuffer(this.healthcheck.unhealthyThreshold);
     this._healtyStatesBuffer = new StateRingBuffer(this.healthcheck.healthyThreshold);
+    this._templates = templates;
+
     if (targets) {
       this.setupNotificationsTargets(targets)
     }
@@ -71,7 +75,16 @@ export default class ServiceStateMonitor {
   setupNotificationsTargets(targets) {
     this._targets = [];
     for (let [targetName, targetConfig] of pairs(targets)) {
-      this._targets.push(Target.init(targetName, targetConfig));
+      const options = _.clone(targetConfig);
+
+      if (options.templateName) {
+        assert(this._templates[options.templateName], `template ${options.templateName} is not found in "templates" section`);
+        options.template = this._templates[options.templateName]
+      } else if (options.templateFile) {
+        options.template = fs.readFileSync(options.templateFile, 'utf8');
+      }
+
+      this._targets.push(Target.init(targetName, options));
     }
   }
 

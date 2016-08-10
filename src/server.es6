@@ -54,7 +54,8 @@ import assert from 'assert';
       rancherClient: rancher,
       service,
       healthcheck,
-      targets
+      targets,
+      templates: config.templates || {}
     });
   }
 
