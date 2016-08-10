@@ -76,8 +76,12 @@ async function envSource() {
     notifications: {
       '*': {
         targets: {
-          email: {
+          email: ALARM_EMAIL_FROM && {
             recipients: ALARM_EMAIL_ADDRESSES && ALARM_EMAIL_ADDRESSES.split(',') || []
+          },
+          slack: ALARM_SLACK_WEBHOOK_URL && {
+            template: ALARM_SLACK_TEMPLATE,
+            templateFile: ALARM_SLACK_TEMPLATE_FILE
           }
         },
         healthcheck: {
@@ -88,8 +92,8 @@ async function envSource() {
       }
     },
     targets: {
-      email: {
-        smtp: ALARM_EMAIL_FROM && {
+      email: ALARM_EMAIL_FROM && {
+        smtp: {
           from: ALARM_EMAIL_FROM,
           auth: emailAuth,
           "host": ALARM_EMAIL_SMTP_HOST,
@@ -102,9 +106,7 @@ async function envSource() {
       slack: ALARM_SLACK_WEBHOOK_URL && {
         webhookUrl: ALARM_SLACK_WEBHOOK_URL,
         channel: ALARM_SLACK_CHANNEL,
-        botName: ALARM_SLACK_BOTNAME,
-        template: ALARM_SLACK_TEMPLATE,
-        templateFile: ALARM_SLACK_TEMPLATE_FILE
+        botName: ALARM_SLACK_BOTNAME
       }
     }
   }

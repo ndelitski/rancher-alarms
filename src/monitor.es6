@@ -75,6 +75,10 @@ export default class ServiceStateMonitor {
   setupNotificationsTargets(targets) {
     this._targets = [];
     for (let [targetName, targetConfig] of pairs(targets)) {
+      if (!targetConfig) { //skip undefined targets
+        continue;
+      }
+
       const options = _.clone(targetConfig);
 
       if (options.templateName) {
