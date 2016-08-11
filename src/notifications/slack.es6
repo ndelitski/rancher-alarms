@@ -4,7 +4,7 @@ import {info} from '../log';
 import axios from 'axios';
 import renderTemplate from '../render-template';
 
-const SLACK_TEMPLATE = `service <#{serviceUrl}|#{serviceName}> in stack <#{stackUrl}|#{stackName}> become #{monitorState} (#{state})`;
+const SLACK_TEMPLATE = `service <#{serviceUrl}|#{serviceName}> in stack <#{stackUrl}|#{stackName}> became #{monitorState} (#{state})`;
 
 export default class SlackTarget extends NotificationTarget {
   constructor({webhookUrl, botName, channel, template = SLACK_TEMPLATE}) {
