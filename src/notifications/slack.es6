@@ -17,16 +17,25 @@ export default class SlackTarget extends NotificationTarget {
   }
 
   async notify(data) {
-    await axios({url: this._url, method: 'POST', data: {
+    const webhookPayload = {
       channel: this._channel,
       username: this._botName,
       text: renderTemplate(this._messageTemplate, data)
-    }});
+    };
 
-    info(`sent email notification to SLACK`)
+    await axios({url: this._url, method: 'POST', data: webhookPayload});
+
+    info(`sent email notification to SLACK channel:${this._channel || 'default'}, text: ${webhookPayload.text}`)
   }
 
   toString() {
-    return `[SlackTarget]`
+    const options = {
+      channel: this._channel,
+      webhookUrl: this._webhookUrl,
+      botName: this._botName,
+      template: this._messageTemplate
+    };
+
+    return `(SlackTarget ${JSON.stringify(options)})`
   }
 }

@@ -94,27 +94,33 @@ export default class ServiceStateMonitor {
 
   notifyNonActiveState(oldState, newState) {
     (async () => {
-      for (let target of this._targets) {
-        let {
-          state,
-          name: serviceName,
-          accountId: envId,
-          environmentId: stackId,
-          id: serviceId,
-        } = this.service;
-        let serviceUrl = this._rancher.buildUrl(`/env/${envId}/apps/stacks/${stackId}/services/${serviceId}/containers`);
-        let stackUrl = this._rancher.buildUrl(`/env/${envId}/apps/stacks/${stackId}`);
-        let stack = await this._rancher.getStack(stackId);
+      let {
+        state,
+        name: serviceName,
+        accountId: envId,
+        environmentId: stackId,
+        id: serviceId,
+      } = this.service;
 
+      let serviceUrl = this._rancher.buildUrl(`/env/${envId}/apps/stacks/${stackId}/services/${serviceId}/containers`);
+      let stackUrl = this._rancher.buildUrl(`/env/${envId}/apps/stacks/${stackId}`);
+      let stack = await this._rancher.getStack(stackId);
+      let environment = await this._rancher.getCurrentEnvironment();
+      let environmentUrl = this._rancher.buildUrl(`/env/${envId}`);
+
+      for (let target of this._targets) {
         target.notify({
-          state,
-          monitorState: newState,
+          service: this.service, // service object with a full list of properties (see Rancher API)
+          state, // rancher service state
+          monitorState: newState, // rancher-alarms service state - always degraded
           serviceName,
-          serviceUrl,
-          stackUrl,
-          stack,
+          serviceUrl, // url to a running service in a rancher UI
+          stackUrl, // url to stack in a rancher UI
+          stack, // stack object with a full list of properties (see Rancher API)
           stackName: stack.name,
-          service: this.service
+          environment, // environment object with a full list of properties (see Rancher API)
+          environmentName: environment.name,
+          environmentUrl, // url to environment in a rancher UI
         })
       }
     })();
