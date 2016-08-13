@@ -6,7 +6,7 @@ import nodemailer from 'nodemailer';
 import {all, promisifyAll} from 'bluebird';
 import renderTemplate from '../render-template';
 
-const EMAIL_TEMPLATE = `service #{serviceName} become #{monitorState} (#{state})
+const EMAIL_TEMPLATE = `service #{serviceName} became #{monitorState} (#{state})
 service: #{serviceUrl}
 stack: #{stackUrl}
 `;

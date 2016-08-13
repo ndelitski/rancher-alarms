@@ -144,10 +144,10 @@ export default class ServiceStateMonitor {
     if (this._isHealthy && this._unhealtyStatesBuffer.validateState('degraded')) {
       this.notifyNonActiveState(this.prevState, this.state);
       this._isHealthy = false;
-      info(`service ${padRight(this.name, 15)} become UNHEALTHY with threshold ${this._unhealtyStatesBuffer.length}`);
+      info(`service ${padRight(this.name, 15)} became UNHEALTHY with threshold ${this._unhealtyStatesBuffer.length}`);
     } else if (!this._isHealthy && this._healtyStatesBuffer.validateState('active')) {
       this._isHealthy = true;
-      info(`service ${padRight(this.name, 15)} become HEALTY with threshold ${this._healtyStatesBuffer.length}`);
+      info(`service ${padRight(this.name, 15)} became HEALTY with threshold ${this._healtyStatesBuffer.length}`);
     }
   }
 
@@ -247,4 +247,3 @@ export default class ServiceStateMonitor {
 function stringify(obj) {
   return JSON.stringify(obj, null, 4);
 }
-

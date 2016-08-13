@@ -44,9 +44,9 @@ On startup get a list of services and instantiate healthcheck monitor for each o
 
 List of healthcheck monitors is updated with `pollServicesInterval` interval. When service is removed it will be no longer monitored.
 
-When service become degraded state all targets will be invoked to process notification.
+When a service transitions to a degraded state, all targets will be invoked to process notification(s).
 
-## Configuration 
+## Configuration
 ```json
 {
     "rancher": {
@@ -128,7 +128,7 @@ When service become degraded state all targets will be invoked to process notifi
 
 ### Supported notification targets
  - email
-    
+
 ## Roadmap
  - Simplify configuration.
  - More use of rancher labels and metadata. Alternate configuration through rancher labels/metadata(can be used in a conjunction with initial config).
