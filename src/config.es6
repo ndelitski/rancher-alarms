@@ -99,7 +99,7 @@ async function envSource() {
           from: ALARM_EMAIL_FROM,
           auth: emailAuth,
           "host": ALARM_EMAIL_SMTP_HOST,
-          "secureConnection": ALARM_EMAIL_SSL || true,
+          "secureConnection": ALARM_EMAIL_SSL === "true",
           "port": ALARM_EMAIL_SMTP_PORT || 465
         },
         template: ALARM_EMAIL_TEMPLATE,
