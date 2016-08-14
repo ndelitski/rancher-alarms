@@ -50,7 +50,7 @@ export default class EmailTarget extends NotificationTarget {
       let mail = {
         from: this._smtpSettings.from,
         to,
-        subject: this._subject,
+        subject: renderTemplate(this._subject, data),
       };
 
       if (this._htmlTemplate) {

@@ -41,6 +41,7 @@ async function envSource() {
     ALARM_EMAIL_SMTP_HOST,
     ALARM_EMAIL_SMTP_PORT,
     ALARM_EMAIL_FROM,
+    ALARM_EMAIL_SUBJECT,
     ALARM_EMAIL_TEMPLATE,
     ALARM_EMAIL_TEMPLATE_FILE,
     ALARM_MONITOR_INTERVAL,
@@ -77,7 +78,8 @@ async function envSource() {
       '*': {
         targets: {
           email: ALARM_EMAIL_FROM && {
-            recipients: ALARM_EMAIL_ADDRESSES && ALARM_EMAIL_ADDRESSES.split(',') || []
+            recipients: ALARM_EMAIL_ADDRESSES && ALARM_EMAIL_ADDRESSES.split(',') || [],
+            subject: ALARM_EMAIL_SUBJECT
           },
           slack: ALARM_SLACK_WEBHOOK_URL && {
             template: ALARM_SLACK_TEMPLATE,
