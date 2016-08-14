@@ -20,7 +20,7 @@ docker run \
     ndelitski/rancher-alarms:0.1.0
 ```
 
-### Docker compose
+### Docker compose for mail notification target
 
 ```yml
 rancher-alarms:
@@ -38,6 +38,21 @@ rancher-alarms:
   tty: true
 ```
 
+### Docker compose for slack channel notification target
+
+```yml
+rancher-alarms:
+  image: ndelitski/rancher-alarms:0.1.0
+  environment:
+    RANCHER_ADDRESS: rancher.yourdomain.com[:port]
+    RANCHER_ACCESS_KEY: AccessKEY
+    RANCHER_SECRET_KEY: SECRETkey
+    RANCHER_PROJECT_ID: 1a5
+    ALARM_SLACK_WEBHOOK_URL: https://hooks.slack.com/services/YOUR_SLACK_UUID
+    ALARM_SLACK_CHANNEL: #devops
+    ALARM_SLACK_BOTNAME: rancher-alarm
+  tty: true
+```
 ## How it works
 
 On startup get a list of services and instantiate healthcheck monitor for each of them if service is in a running state. Removed, purged and etc services will be ignored
@@ -104,6 +119,11 @@ When a service transitions to a degraded state, all targets will be invoked to p
                 "host": "smtp.gmail.com",
                 "secureConnection": true,
                 "port": 465
+            },
+        "slack": {
+            "webhookUrl": "https://hooks.slack.com/services/YOUR_SLACK_UUID,
+            "botName": "rancher-alarm",
+            "channel": "#devops"
             }
         }
     }
@@ -128,6 +148,7 @@ When a service transitions to a degraded state, all targets will be invoked to p
 
 ### Supported notification targets
  - email
+ - slack
 
 ## Roadmap
  - Simplify configuration.
@@ -138,3 +159,4 @@ When a service transitions to a degraded state, all targets will be invoked to p
  - Test coverage. Setup drone.io
  - Notify when all services operate normal after some of them were in a degraded state
  - Refactor notifications
+ - Shrinking image size with alpine linux

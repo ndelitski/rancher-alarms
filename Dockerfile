@@ -1,1 +1,1 @@
-FROM node:4.2.1-onbuild
+FROM ndelitski/node:4-onbuild
