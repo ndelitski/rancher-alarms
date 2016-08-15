@@ -24,7 +24,7 @@ push() {
 
 tag() {
     local tg=$1
-    docker tag -f ${image} ${repo}/${image}:${tg}
+    docker tag ${image} ${repo}/${image}:${tg}
 }
 
 check_state() {
