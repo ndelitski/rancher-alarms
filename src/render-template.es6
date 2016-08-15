@@ -6,7 +6,7 @@ export default function renderTemplate(template, data) {
 
   // interpolate string
   for (let [k,v] of _.pairs(data)) {
-    result = result.replace(`#{${k}}`, v)
+    result = result.replace(new RegExp(`#{${k}}`, 'g'), v)
   }
 
   // check if not all variables are filled
