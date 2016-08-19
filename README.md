@@ -68,7 +68,8 @@ More docker-compose examples see in [examples](https://github.com/ndelitski/ranc
 ### Environment variables
 
 #### Rancher settings
- - `RANCHER_ADDRESS` the only required parameter here if you are running, host:port format of your rancher server
+Could be ignored if you are running inside Rancher environment (service should be started as a rancher agent though)
+ - `RANCHER_ADDRESS`
  - `RANCHER_PROJECT_ID`
  - `RANCHER_ACCESS_KEY`
  - `RANCHER_SECRET_KEY`
@@ -81,7 +82,6 @@ More docker-compose examples see in [examples](https://github.com/ndelitski/ranc
  - `ALARM_FILTER`
  
 #### Email target settings
- - `ALARM_EMAIL_ADDRESSES`
  - `ALARM_EMAIL_ADDRESSES`
  - `ALARM_EMAIL_USER`
  - `ALARM_EMAIL_PASS`
