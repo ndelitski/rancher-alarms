@@ -17,7 +17,10 @@ export default class RancherClient {
 
     if (!url) {
       assert(address, '`url` is missing');
-      url = (address.match(/^http/) ? address : protocol + '://' + address) + '/' + version
+      url = (address.match(/^http/) ? address : protocol + '://' + address);
+      if (!url.match(/\/v\d+$/)) {
+        url += '/' + version
+      }
     }
 
     this.address = url;
@@ -34,7 +37,7 @@ export default class RancherClient {
     assert(options.url);
     try {
       const res = await axios(merge(options, {
-        url: this.address + options.url,
+        url: this.buildUrl(options.url),
         headers: this._auth ? {
           'Authorization': 'Basic ' + new Buffer(this._auth.user + ':' + this._auth.password).toString('base64')
         } : {},
@@ -50,42 +53,47 @@ export default class RancherClient {
 
   async getServices() {
     return (await this._request({
-      url: `/projects/${this.projectId}/services`
+      url: `projects/${this.projectId}/services`
     })).data;
   }
 
   async getStacks() {
     return (await this._request({
-      url: `/projects/${this.projectId}/environments`
+      url: `projects/${this.projectId}/environments`
     })).data;
   }
 
   async getService(serviceId) {
     return await this._request({
-      url: `/projects/${this.projectId}/services/${serviceId}`
+      url: `projects/${this.projectId}/services/${serviceId}`
     });
   }
 
   async getCurrentEnvironment() {
     return await this._request({
-      url: `/projects/${this.projectId}`
+      url: `projects/${this.projectId}`
     });
   }
 
   async getStack(stackId) {
     return await this._request({
-      url: `/projects/${this.projectId}/environments/${stackId}`
+      url: `projects/${this.projectId}/environments/${stackId}`
     });
   }
 
   async getServiceContainers(serviceId) {
     return (await this._request({
-      url: `/projects/${this.projectId}/services/${serviceId}/instances`
+      url: `projects/${this.projectId}/services/${serviceId}/instances`
     })).data;
   }
 
   buildUrl(path) {
-    return $url.resolve(this.address, path);
+    if (path.startsWith('/')) {
+      return $url.resolve(this.address, path);
+    } else {
+      return this.address + '/' + path
+    }
+
   }
 
 }
