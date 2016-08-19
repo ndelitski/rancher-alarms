@@ -27,7 +27,7 @@ rancher-alarms:
 
 NOTE: Including rancher agent labels is crucial otherwise you need provide rancher credentials manually with RANCHER_* variables
 
-### Outside Rancher environment with `docker run`
+### Outside Rancher environment using `docker run`
 ```
 docker run \
     -d \
@@ -49,7 +49,7 @@ List of healthcheck monitors is updated with a `pollServicesInterval` interval. 
 When a service transitions to a degraded state, all targets will be invoked to process notification(s).
 
 
-## `docker-compose` configuration 
+## docker-compose configuration 
 
 ### Docker compose for email notification target
 
@@ -66,17 +66,20 @@ More docker-compose examples see in [examples](https://github.com/ndelitski/ranc
 ## Configuration
 
 ### Environment variables
+
 #### Rancher settings
  - `RANCHER_ADDRESS` the only required parameter here if you are running, host:port format of your rancher server
  - `RANCHER_PROJECT_ID`
  - `RANCHER_ACCESS_KEY`
  - `RANCHER_SECRET_KEY`
+ 
 #### Polling settings
  - `ALARM_POLL_INTERVAL` 
  - `ALARM_MONITOR_INTERVAL`
  - `ALARM_MONITOR_HEALTHY_THRESHOLD`
  - `ALARM_MONITOR_UNHEALTHY_THRESHOLD`
  - `ALARM_FILTER`
+ 
 #### Email target settings
  - `ALARM_EMAIL_ADDRESSES`
  - `ALARM_EMAIL_ADDRESSES`
@@ -89,6 +92,7 @@ More docker-compose examples see in [examples](https://github.com/ndelitski/ranc
  - `ALARM_EMAIL_SUBJECT`
  - `ALARM_EMAIL_TEMPLATE`
  - `ALARM_EMAIL_TEMPLATE_FILE`
+ 
 #### Slack target settings
  - `ALARM_SLACK_WEBHOOK_URL`
  - `ALARM_SLACK_CHANNEL`
@@ -153,7 +157,7 @@ See [examples](https://github.com/ndelitski/rancher-alarms/tree/master/examples)
             }
         },
         "slack": {
-            "webhookUrl": "https://hooks.slack.com/services/YOUR_SLACK_UUID,
+            "webhookUrl": "https://hooks.slack.com/services/YOUR_SLACK_UUID",
             "botName": "rancher-alarm",
             "channel": "#devops"
         }
