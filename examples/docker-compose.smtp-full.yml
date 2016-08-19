@@ -1,0 +1,16 @@
+# Send SMTP notifications with using full list of sutomization parameters
+rancher-alarms:
+  image: ndelitski/rancher-alarms
+  environment:
+    ALARM_EMAIL_ADDRESSES: john@snow.com
+    ALARM_EMAIL_USER: alarm@nightwatch.com
+    ALARM_EMAIL_PASS: nightWatch
+    ALARM_EMAIL_SMTP_HOST: smtp.nightwatch.com
+    ALARM_EMAIL_SMTP_PORT: 465
+    ALARM_EMAIL_FROM: 'Alarm of a Night Watch <alarm@nightwatch.com>'
+    ALARM_EMAIL_SSL: true
+    ALARM_EMAIL_SUBJECT: '[Rancher-Alarms] problems with #{serviceName}'
+    ALARM_EMAIL_TEMPLATE: 'service #{serviceName} become #{monitorState}'
+  labels:
+    io.rancher.container.create_agent: true
+    io.rancher.container.agent.role: environment

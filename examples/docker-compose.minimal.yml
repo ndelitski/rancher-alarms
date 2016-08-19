@@ -1,0 +1,8 @@
+# push messages in default Slack channel with default template
+rancher-alarms:
+  image: ndelitski/rancher-alarms
+  environment:
+    ALARM_SLACK_WEBHOOK_URL: https://hooks.slack.com/services/YOUR-WEBHOOK-ID
+  labels:
+      io.rancher.container.create_agent: true
+      io.rancher.container.agent.role: environment

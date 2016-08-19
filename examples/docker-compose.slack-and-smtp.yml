@@ -1,0 +1,14 @@
+# 2 notifications targets here SLACK and SMTP
+rancher-alarms:
+  image: ndelitski/rancher-alarms
+  environment:
+    ALARM_EMAIL_ADDRESSES: john@snow.com
+    ALARM_EMAIL_USER: alarm@nightwatch.com
+    ALARM_EMAIL_PASS: nightWatch
+    ALARM_EMAIL_SMTP_HOST: smtp.nightwatch.com
+    ALARM_EMAIL_FROM: 'Alarm of a Night Watch <alarm@nightwatch.com>'
+    ALARM_SLACK_WEBHOOK_URL: https://hooks.slack.com/services/...
+  labels:
+      io.rancher.container.create_agent: true
+      io.rancher.container.agent.role: environment
+
