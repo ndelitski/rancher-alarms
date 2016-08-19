@@ -18,6 +18,7 @@
     "axios": "^0.7.0",
     "babel-core": "^5.8.33",
     "bluebird": "^3.0.5",
+    "deep-set": "^1.0.1",
     "lodash": "^3.10.1",
     "nodemailer": "^1.8.0",
     "yield": "0.0.6-8"

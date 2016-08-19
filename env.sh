@@ -11,7 +11,7 @@ version_default=latest
 container_name=$image
 
 build() {
-  local tg=$1
+  local tg=${1:-$version_default}
   docker build --pull --rm -t ${image} ./
   tag $tg
 }
