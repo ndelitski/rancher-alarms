@@ -4,30 +4,37 @@ import {merge, omit} from 'lodash';
 import $url from 'url';
 
 export default class RancherClient {
-  constructor({address, auth, projectId}) {
-    assert(address, '`address` is missing');
-    assert(projectId, '`projectId` is missing');
-
+  constructor({address, version='v1', url, protocol='http', auth, projectId}) {
     if (auth) {
       assert(auth.accessKey, '`auth.accessKey` is missing');
       assert(auth.secretKey, '`auth.secretKey` is missing');
       this._auth = {user: auth.accessKey, password: auth.secretKey};
     }
 
-    if (!address.match(/^http/)) {
+    if (address && !address.match(/^http/)) {
       address = 'http://' + address;
     }
 
-    this.address = address;
+    if (!url) {
+      assert(address, '`url` is missing');
+      url = (address.match(/^http/) ? address : protocol + '://' + address) + '/' + version
+    }
+
+    this.address = url;
     this.projectId = projectId;
+  }
+
+  async getCurrentProjectIdAsync() {
+    return (await this._request({
+      url: `/accounts`
+    })).data[0].id;
   }
 
   async _request(options) {
     assert(options.url);
-
     try {
       const res = await axios(merge(options, {
-        url: $url.resolve(this.address, options.url),
+        url: this.address + options.url,
         headers: this._auth ? {
           'Authorization': 'Basic ' + new Buffer(this._auth.user + ':' + this._auth.password).toString('base64')
         } : {},
@@ -43,37 +50,37 @@ export default class RancherClient {
 
   async getServices() {
     return (await this._request({
-      url: `/v1/projects/${this.projectId}/services`
+      url: `/projects/${this.projectId}/services`
     })).data;
   }
 
   async getStacks() {
     return (await this._request({
-      url: `/v1/projects/${this.projectId}/environments`
+      url: `/projects/${this.projectId}/environments`
     })).data;
   }
 
   async getService(serviceId) {
     return await this._request({
-      url: `/v1/projects/${this.projectId}/services/${serviceId}`
+      url: `/projects/${this.projectId}/services/${serviceId}`
     });
   }
 
   async getCurrentEnvironment() {
     return await this._request({
-      url: `/v1/projects/${this.projectId}`
+      url: `/projects/${this.projectId}`
     });
   }
 
   async getStack(stackId) {
     return await this._request({
-      url: `/v1/projects/${this.projectId}/environments/${stackId}`
+      url: `/projects/${this.projectId}/environments/${stackId}`
     });
   }
 
   async getServiceContainers(serviceId) {
     return (await this._request({
-      url: `/v1/projects/${this.projectId}/services/${serviceId}/instances`
+      url: `/projects/${this.projectId}/services/${serviceId}/instances`
     })).data;
   }
 
