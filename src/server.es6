@@ -8,27 +8,33 @@ import assert from 'assert';
 
 (async () => {
   const config = await resolveConfig();
+
   info(`started with config:\n${JSON.stringify(config, null, 4)}`);
   assert(config.pollServicesInterval, '`pollServicesInterval` is missing');
   if (config.filter) {
     assert(isArray(config.filter), '`filters` should be of type Array');
   }
+
   const rancher = new RancherClient(config.rancher);
-  const stacksById = (await rancher.getStacks()).reduce((map, {name, id}) => {
+  const stacks = (await rancher.getStacks())
+    .filter(stack => !stack.system) // ignore `system: true` stacks
+  trace(`loaded stacks from API\n${JSON.stringify(stacks, null, 4)}`)
+  const stacksById = (stacks).reduce((map, {name, id}) => {
     map[id] = name;
     return map;
   }, {});
+
   const services = (await rancher.getServices())
     .filter(globalServiceFilterPredicate)
-    .filter(runningServicePredicate);
+    .filter(runningServicePredicate)
+    .filter(s => keys(stacksById).indexOf(s.environmentId) !== -1);
+  trace(`loaded services from API\n${JSON.stringify(services, null, 4)}`)
 
   const monitors = await all(services.map(initServiceMonitor));
-
   info('monitors inited:');
   for (let m of monitors) {
     info(m.toString());
   }
-
   invoke(values(monitors), 'start');
 
   while(true) {
