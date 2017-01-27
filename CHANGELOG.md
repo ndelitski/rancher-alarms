@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.1.6 (January 27, 2017)
+ - Ignore system stacks. Fix #23
+ 
 ## v0.1.5
  - Fixed retrieval of project id (environment id) PR#21
  - Minified Docker image size
