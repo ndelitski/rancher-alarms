@@ -1,5 +1,8 @@
 # Changelog
 
+### v0.1.7 (January 28, 2017)
+ - Fix system-type services caused to crush after refetching services list. Fix #23
+ 
 ## v0.1.6 (January 27, 2017)
  - Ignore system stacks. Fix #23
  
@@ -11,5 +14,5 @@
  - support for rancher-agent, no need to define rancher_* variables anymore
  - add filter gsto monitor specific range of services. use `ALARM_FILTER=regex1,regex2`
  - search configs files in multiple dirs - local dir, cwd, /etc/rancher-alarms
- - huge update of docs
+ - huge update of docsgs
  - examples folder with env configurations
