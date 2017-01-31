@@ -18,7 +18,7 @@ Send notifications when something goes wrong in rancher
 rancher-alarms:
   image: ndelitski/rancher-alarms
   environment:
-    ALARM_SLACK_WEBHOOK_URL=https://hooks.slack.com/services/:UUID
+    ALARM_SLACK_WEBHOOK_URL:https://hooks.slack.com/services/:UUID
   labels:
     io.rancher.container.create_agent: true
     io.rancher.container.agent.role: environment
