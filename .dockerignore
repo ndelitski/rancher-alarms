@@ -8,6 +8,7 @@ Makefile
 env
 *.log
 .idea
+.DS_Store
 docker-compose.yml
 
 node_modules

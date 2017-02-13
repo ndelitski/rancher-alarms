@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ndelitski/rancher-alarms.git"
+    "url": "git+https://github.com/VAdamec/rancher-alarms"
   },
   "author": "Nick Delitski",
   "license": "MIT",
@@ -21,6 +21,8 @@
     "deep-set": "^1.0.1",
     "lodash": "^3.10.1",
     "nodemailer": "^1.8.0",
-    "yield": "0.0.6-8"
+    "yield": "0.0.6-8",
+    "js-base64": "2.1.9",
+    "minimatch": "3.0.3"
   }
 }
