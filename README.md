@@ -6,7 +6,9 @@ Send notifications when something goes wrong in rancher
  - Will kick your ass when service state is not okay
  - Various notification mechanisms
    - email
-   - slack
+   - slack/mattermost
+   - hipchat
+   - graphite (annotations)
    - * please create an issue if you need more
  - Configure notification mechanisms globally or on a per service level(supported in `.json` config setup for now)
  - Customize your notification messages
@@ -100,11 +102,17 @@ Could be ignored if you are running inside Rancher environment (service should b
  - `ALARM_SLACK_TEMPLATE`
  - `ALARM_SLACK_TEMPLATE_FILE`
 
+#### Hipchat target settings
+ - `ALARM_HIPCHAT_WEBHOOK_URL`
+ - `ALARM_HIPCHAT_NOTIFY`
+ - `ALARM_HIPCHAT_TEMPLATE`
+ - `ALARM_HIPCHAT_TEMPLATE_FILE`
+
 #### GRAPHITE target settings
  - `ALARM_GRAPHITE_WEBHOOK_URL`
  - `ALARM_GRAPHITE_TAG`
- - `ALARM_GRAPHITE_LOGIN`
- - `ALARM_GRAPHITE_PASS`
+ - `ALARM_GRAPHITE_TEMPLATE`
+ - `ALARM_GRAPHITE_TEMPLATE_FILE`
 
 See [examples](https://github.com/ndelitski/rancher-alarms/tree/master/examples) using environment config in docker-compose files
 
@@ -167,9 +175,13 @@ See [examples](https://github.com/ndelitski/rancher-alarms/tree/master/examples)
             "botName": "rancher-alarm",
             "channel": "#devops"
         },
+        "hipchat": {
+            "webhookUrl": "https://triberhr.hipchat.com/v2/room/YOUR_ROOM_ID/notification?auth_token=YOUR_HIPCHAT_TOKEN",
+            "notify": "true"
+        },
         "graphite": {
             "webhookUrl": "http://graphite/events/",
-            "botName": "alarm,rancher",
+            "botName": "alarm",
             "GraphiteLogin": "guest",
             "GraphitePass": "guest"
           }

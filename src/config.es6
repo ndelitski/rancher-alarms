@@ -80,6 +80,10 @@ async function envSource() {
     ALARM_SLACK_BOTNAME,
     ALARM_SLACK_TEMPLATE,
     ALARM_SLACK_TEMPLATE_FILE,
+    ALARM_HIPCHAT_WEBHOOK_URL,
+    ALARM_HIPCHAT_NOTIFY,
+    ALARM_HIPCHAT_TEMPLATE,
+    ALARM_HIPCHAT_TEMPLATE_FILE,
     ALARM_GRAPHITE_WEBHOOK_URL,
     ALARM_GRAPHITE_TAG,
     ALARM_GRAPHITE_LOGIN,
@@ -134,6 +138,10 @@ async function envSource() {
             template: ALARM_SLACK_TEMPLATE,
             templateFile: ALARM_SLACK_TEMPLATE_FILE
           },
+          hipchat: ALARM_HIPCHAT_WEBHOOK_URL && {
+            template: ALARM_HIPCHAT_TEMPLATE,
+            templateFile: ALARM_HIPCHAT_TEMPLATE_FILE
+          },
           graphite: ALARM_GRAPHITE_WEBHOOK_URL && {
             tagName: ALARM_GRAPHITE_TAG && ALARM_GRAPHITE_TAG.split(',') || []
           },
@@ -161,6 +169,10 @@ async function envSource() {
         webhookUrl: ALARM_SLACK_WEBHOOK_URL,
         channel: ALARM_SLACK_CHANNEL,
         botName: ALARM_SLACK_BOTNAME || 'rancher-alarms'
+      },
+      hipchat: ALARM_HIPCHAT_WEBHOOK_URL && {
+        webhookUrl: ALARM_HIPCHAT_WEBHOOK_URL,
+        notify: ALARM_HIPCHAT_NOTIFY || 'true'
       },
       graphite: ALARM_GRAPHITE_WEBHOOK_URL && {
         webhookUrl: ALARM_GRAPHITE_WEBHOOK_URL || 'http://graphite/events/',
