@@ -9,7 +9,7 @@ Send notifications when something goes wrong in rancher
    - slack/mattermost
    - hipchat
    - graphite (annotations)
-   - * please create an issue if you need more
+   - please create an issue if you need more
  - Configure notification mechanisms globally or on a per service level(supported in `.json` config setup for now)
  - Customize your notification messages
 
