@@ -20,7 +20,7 @@ export function trace(...args) {
 export function error(msg, err) {
   if (arguments.length === 1) {
     msg = 'error';
-    err = msg;
+    err = arguments[0];
   }
 
   log(msg, err, err.stack);

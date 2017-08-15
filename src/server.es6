@@ -20,6 +20,7 @@ import assert from 'assert';
   }, {});
   const services = (await rancher.getServices())
     .filter(globalServiceFilterPredicate)
+    .filter(notSystemServicePredicate)
     .filter(runningServicePredicate);
 
   const monitors = await all(services.map(initServiceMonitor));
@@ -60,7 +61,9 @@ import assert from 'assert';
   }
 
   async function updateMonitors() {
-    const availableServices = (await rancher.getServices()).filter(globalServiceFilterPredicate);
+    const availableServices = (await rancher.getServices())
+      .filter(notSystemServicePredicate)
+      .filter(globalServiceFilterPredicate);
     const monitoredServices = pluck(monitors, 'service');
     trace(`updating monitors`);
 
@@ -95,6 +98,10 @@ import assert from 'assert';
      */
   function runningServicePredicate(service) {
     return ['active', 'upgraded', 'upgrading', 'updating-active'].indexOf(service.state) !== -1;
+  }
+
+  function notSystemServicePredicate(service) {
+    return service.kind === 'service'
   }
 
   function globalServiceFilterPredicate(service) {
