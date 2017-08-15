@@ -1,6 +1,6 @@
 import _, {pairs, defaults, padRight, invoke} from 'lodash';
 import Target from './notifications/target';
-import {info, trace, error} from './log';
+import {info, trace, error as logError} from './log';
 import assert from 'assert';
 import {delay} from 'bluebird';
 import y from 'yield';
@@ -63,8 +63,8 @@ export default class ServiceStateMonitor {
     this.stackName = stackName;
     this._isHealthy = true;
     this._rancher = rancherClient;
-    this._unhealtyStatesBuffer = new StateRingBuffer(this.healthcheck.unhealthyThreshold);
-    this._healtyStatesBuffer = new StateRingBuffer(this.healthcheck.healthyThreshold);
+    this._unhealhtyStatesBuffer = new StateRingBuffer(this.healthcheck.unhealthyThreshold);
+    this._healhtyStatesBuffer = new StateRingBuffer(this.healthcheck.healthyThreshold);
     this._templates = templates;
 
     if (targets) {
@@ -92,27 +92,30 @@ export default class ServiceStateMonitor {
     }
   }
 
-  notifyNonActiveState(oldState, newState) {
-    (async () => {
-      let {
-        state,
-        name: serviceName,
-        accountId: envId,
-        environmentId: stackId,
-        id: serviceId,
-      } = this.service;
+  async notifyHealthStateChangeAsync(isHealthy, oldState, newState) {
+    let {
+      state,
+      name: serviceName,
+      accountId: envId,
+      environmentId: stackId,
+      id: serviceId,
+    } = this.service;
 
-      let serviceUrl = this._rancher.buildUrl(`/env/${envId}/apps/stacks/${stackId}/services/${serviceId}/containers`);
-      let stackUrl = this._rancher.buildUrl(`/env/${envId}/apps/stacks/${stackId}`);
-      let stack = await this._rancher.getStack(stackId);
-      let environment = await this._rancher.getCurrentEnvironment();
-      let environmentUrl = this._rancher.buildUrl(`/env/${envId}`);
+    let serviceUrl = this._rancher.buildUrl(`/env/${envId}/apps/stacks/${stackId}/services/${serviceId}/containers`);
+    let stackUrl = this._rancher.buildUrl(`/env/${envId}/apps/stacks/${stackId}`);
+    let stack = await this._rancher.getStack(stackId);
+    let environment = await this._rancher.getCurrentEnvironment();
+    let environmentUrl = this._rancher.buildUrl(`/env/${envId}`);
 
-      for (let target of this._targets) {
-        target.notify({
+    for (let target of this._targets) {
+      try {
+        await target.notify({
+          isHealthy: isHealthy,
+          healthyState: isHealthy ? 'HEALTHY' : 'UNHEALTHY',
           service: this.service, // service object with a full list of properties (see Rancher API)
           state, // rancher service state
-          monitorState: newState, // rancher-alarms service state - always degraded
+          prevMonitorState: oldState, // rancher-alarms previous service state
+          monitorState: newState, // rancher-alarms service state - e.g. always degraded for unhealthy
           serviceName,
           serviceUrl, // url to a running service in a rancher UI
           stackUrl, // url to stack in a rancher UI
@@ -122,16 +125,18 @@ export default class ServiceStateMonitor {
           environmentName: environment.name,
           environmentUrl, // url to environment in a rancher UI
         })
+      } catch(err) {
+        logError(`failed to notify target ${target.toString()}`, err);
       }
-    })();
+    }
   }
 
   _pushState(state) {
     this.prevState = this.state;
     this.state = state;
-    this._unhealtyStatesBuffer.push(state);
-    this._healtyStatesBuffer.push(state);
-    trace(`${this.name} buffers:\n \thealthy: ${this._healtyStatesBuffer} \n\tunhealthy: ${this._unhealtyStatesBuffer}`);
+    this._unhealhtyStatesBuffer.push(state);
+    this._healhtyStatesBuffer.push(state);
+    trace(`${this.name} buffers:\n \thealthy: ${this._healhtyStatesBuffer} \n\tunhealthy: ${this._unhealhtyStatesBuffer}`);
   }
 
   updateState(newState) {
@@ -141,13 +146,14 @@ export default class ServiceStateMonitor {
       info(`service ${padRight(this.name, 15)} ${this.prevState || 'unknown'} -> ${this.state}`);
     }
 
-    if (this._isHealthy && this._unhealtyStatesBuffer.validateState('degraded')) {
-      this.notifyNonActiveState(this.prevState, this.state);
+    if (this._isHealthy && this._unhealhtyStatesBuffer.validateState('degraded')) {
       this._isHealthy = false;
-      info(`service ${padRight(this.name, 15)} became UNHEALTHY with threshold ${this._unhealtyStatesBuffer.length}`);
-    } else if (!this._isHealthy && this._healtyStatesBuffer.validateState('active')) {
+      this.notifyHealthStateChangeAsync(this._isHealthy, this.prevState, this.state);
+      info(`service ${padRight(this.name, 15)} became UNHEALTHY with threshold ${this._unhealhtyStatesBuffer.length}`);
+    } else if (!this._isHealthy && this._healhtyStatesBuffer.validateState('active')) {
       this._isHealthy = true;
-      info(`service ${padRight(this.name, 15)} became HEALTY with threshold ${this._healtyStatesBuffer.length}`);
+      this.notifyHealthStateChangeAsync(this._isHealthy, this.prevState, this.state);
+      info(`service ${padRight(this.name, 15)} became HEALTHY with threshold ${this._healhtyStatesBuffer.length}`);
     }
   }
 
@@ -170,14 +176,14 @@ export default class ServiceStateMonitor {
     this.service = await this._rancher.getService(this.service.id);
     trace(`poll ${this.name}`);
 
-    if (this.service.state == 'updating-active') {
+    if (this.service.state === 'updating-active') {
       newState = 'degraded';
-    } else if (this.service.state == 'active') {
+    } else if (this.service.state === 'active') {
       if (this.service.launchConfig && this.service.launchConfig.healthCheck) {
         const containers = await this._rancher.getServiceContainers(this.service.id);
 
         const hasUnhealthyContainers = _(this._withoutSidekicks(containers))
-          .filter((c) => c.state == 'running')
+          .filter((c) => c.state === 'running')
           .some((c) => (c.healthState !== 'healthy'));
 
         newState = hasUnhealthyContainers ? 'degraded' : 'active';

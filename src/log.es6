@@ -17,8 +17,13 @@ export function trace(...args) {
   log('trace', ...args);
 }
 
-export function error(err) {
-  log('error', err, err.stack);
+export function error(msg, err) {
+  if (arguments.length === 1) {
+    msg = 'error';
+    err = msg;
+  }
+
+  log(msg, err, err.stack);
 }
 
 function log(severity, ...args) {

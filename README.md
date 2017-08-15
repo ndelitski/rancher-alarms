@@ -3,7 +3,7 @@
 Send notifications when something goes wrong in rancher
 
 ## Features
- - Will kick your ass when service state is not okay
+ - Will kick your ass when service goes down and send message when on recover
  - Various notification mechanisms
    - email
    - slack
@@ -182,7 +182,23 @@ See [examples](https://github.com/ndelitski/rancher-alarms/tree/master/examples)
  - `targets` base settings for each notification target. `required`
 
 ## Templates
-TODO: Add description
+### List of template variables:
+ - `healthyState` HEALTHY or UNHEALTHY
+ - `state` service state like it named in Rancher API
+ - `prevMonitorState` rancher-alarms previous service state name
+ - `monitorState` rancher-alarms service state name - e.g. always degraded for unhealthy
+ - `serviceName` Name of a service in a Rancher
+ - `serviceUrl` Url to a running service in a Rancher UI
+ - `stackUrl` Url to stack in a Rancher UI
+ - `stackName` Name of a stack in a Rancher
+ - `environmentName`  Name of a environment in a Rancher
+ - `environmentUrl` URL to environment in a rancher UI
+
+### Using variables in template string:
+```
+Hey buddy! Your service #{serviceName} become #{healthyState}, direct link to the service #{serviceUrl}
+```
+More detailed examples your can see in the `examples` folder
 
 ## Roadmap
  - [] Simplify configuration.
@@ -191,6 +207,6 @@ TODO: Add description
  - [] More notifications mechanisms: AWS SNS, http, sms
  - [x] Support templating
  - [] Test coverage. Setup drone.io
- - [] Notify when all services operate normal after some of them were in a degraded state
+ - [x] Notify when all services operate normal after some of them were in a degraded state
  - [] Refactor code
  - [x] Shrinking image size with alpine linux

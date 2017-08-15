@@ -46,7 +46,7 @@ export default class EmailTarget extends NotificationTarget {
   }
 
   async notify(data) {
-    all(this._recipients).map((to) => {
+    await all(this._recipients).map((to) => {
       let mail = {
         from: this._smtpSettings.from,
         to,

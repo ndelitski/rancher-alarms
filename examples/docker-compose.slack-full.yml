@@ -5,7 +5,7 @@ rancher-alarms:
     ALARM_SLACK_WEBHOOK_URL: https://hooks.slack.com/services/sdf/sdf24
     ALARM_SLACK_CHANNEL: "@somebody"
     ALARM_SLACK_BOTNAME: "rancher-alarm"
-    ALARM_SLACK_TEMPLATE: "Hey buddy! Your service #{serviceName} goes down"
+    ALARM_SLACK_TEMPLATE: "Hey buddy! Your service #{serviceName} become #{healthyState}"
   labels:
     io.rancher.container.create_agent: true
     io.rancher.container.agent.role: environment

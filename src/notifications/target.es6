@@ -8,7 +8,7 @@ export default class NotificationTarget {
     info(message);
   }
   static init(name, options) {
-    assert(VALID_TARGETS.indexOf(name) != -1, `invalid notification target '${name}'`);
+    assert(VALID_TARGETS.indexOf(name) !== -1, `invalid notification target '${name}'`);
     return new (require('./' + name))(options);
   }
 }
