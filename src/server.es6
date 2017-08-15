@@ -8,28 +8,34 @@ import assert from 'assert';
 
 (async () => {
   const config = await resolveConfig();
+
   info(`started with config:\n${JSON.stringify(config, null, 4)}`);
   assert(config.pollServicesInterval, '`pollServicesInterval` is missing');
   if (config.filter) {
     assert(isArray(config.filter), '`filters` should be of type Array');
   }
+
   const rancher = new RancherClient(config.rancher);
-  const stacksById = (await rancher.getStacks()).reduce((map, {name, id}) => {
+  const stacks = (await rancher.getStacks())
+    .filter(stack => !stack.system) // ignore `system: true` stacks
+  trace(`loaded stacks from API\n${JSON.stringify(stacks, null, 4)}`)
+  let stacksById = (stacks).reduce((map, {name, id}) => {
     map[id] = name;
     return map;
   }, {});
+
   const services = (await rancher.getServices())
     .filter(globalServiceFilterPredicate)
-    .filter(notSystemServicePredicate)
-    .filter(runningServicePredicate);
+    .filter(runningServicePredicate)
+    .filter(s => keys(stacksById).indexOf(s.environmentId) !== -1);
+  trace(`loaded services from API\n${JSON.stringify(services, null, 4)}`)
+  let systemServicesIds = [] // cache of system services we will ignore
 
   const monitors = await all(services.map(initServiceMonitor));
-
   info('monitors inited:');
   for (let m of monitors) {
     info(m.toString());
   }
-
   invoke(values(monitors), 'start');
 
   while(true) {
@@ -62,15 +68,35 @@ import assert from 'assert';
 
   async function updateMonitors() {
     const availableServices = (await rancher.getServices())
-      .filter(notSystemServicePredicate)
       .filter(globalServiceFilterPredicate);
     const monitoredServices = pluck(monitors, 'service');
     trace(`updating monitors`);
 
     //check if there are new services running
     for (let s of availableServices.filter(runningServicePredicate)) {
+      if (systemServicesIds.indexOf(s.id) !== -1) {
+        trace(`service id=${s.id} name=${s.name} is system, ignoring...`);
+        continue
+      }
+
       if (!find(monitoredServices, {id: s.id})) {
-        const stackName = stacksById[s.environmentId];
+        if (!s.environmentId) {
+          // some services doesn't have `environmentId` property. we will skip these so far (I suppose those are internal Rancher services)
+          trace(`service id=${s.id} name=${s.name} has no environmentId property, skipping... data=${JSON.stringify(s, null, 4)}`);
+          continue;
+        }
+
+        let stackName = stacksById[s.environmentId];
+        if (!stackName) {
+          const stack = await rancher.getStack(s.environmentId)
+          if (stack.system) {
+            systemServicesIds.push(s.id)
+            trace(`service id=${s.id} name=${s.name} is system, skipping... data=${JSON.stringify(s, null, 4)}`);
+            continue;
+          }
+          // we found new `user` stack, add it to cache
+          stackName = stacksById[stack.id] = stack.name
+        }
         info(`discovered new running service, creating monitor for: ${stackName}/${s.name}`);
         const monitor = await initServiceMonitor(s);
         info(`new monitor up ${monitor}`);
@@ -98,10 +124,6 @@ import assert from 'assert';
      */
   function runningServicePredicate(service) {
     return ['active', 'upgraded', 'upgrading', 'updating-active'].indexOf(service.state) !== -1;
-  }
-
-  function notSystemServicePredicate(service) {
-    return service.kind === 'service'
   }
 
   function globalServiceFilterPredicate(service) {

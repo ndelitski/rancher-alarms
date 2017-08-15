@@ -29,7 +29,7 @@ export default class RancherClient {
 
   async getCurrentProjectIdAsync() {
     return (await this._request({
-      url: `/accounts`
+      url: `/v1/projects/`
     })).data[0].id;
   }
 
