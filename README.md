@@ -6,8 +6,10 @@ Send notifications when something goes wrong in rancher
  - Will kick your ass when service goes down and send message when on recover
  - Various notification mechanisms
    - email
-   - slack
-   - * please create an issue if you need more
+   - slack/mattermost
+   - hipchat
+   - graphite (annotations)
+   - please create an issue if you need more
  - Configure notification mechanisms globally or on a per service level(supported in `.json` config setup for now)
  - Customize your notification messages
 
@@ -49,7 +51,7 @@ List of healthcheck monitors is updated with a `pollServicesInterval` interval. 
 When a service transitions to a degraded state, all targets will be invoked to process notification(s).
 
 
-## docker-compose configuration 
+## docker-compose configuration
 
 ### Docker compose for email notification target
 
@@ -73,14 +75,14 @@ Could be ignored if you are running inside Rancher environment (service should b
  - `RANCHER_PROJECT_ID`
  - `RANCHER_ACCESS_KEY`
  - `RANCHER_SECRET_KEY`
- 
+
 #### Polling settings
- - `ALARM_POLL_INTERVAL` 
+ - `ALARM_POLL_INTERVAL`
  - `ALARM_MONITOR_INTERVAL`
  - `ALARM_MONITOR_HEALTHY_THRESHOLD`
  - `ALARM_MONITOR_UNHEALTHY_THRESHOLD`
  - `ALARM_FILTER`
- 
+
 #### Email target settings
  - `ALARM_EMAIL_ADDRESSES`
  - `ALARM_EMAIL_USER`
@@ -92,14 +94,26 @@ Could be ignored if you are running inside Rancher environment (service should b
  - `ALARM_EMAIL_SUBJECT`
  - `ALARM_EMAIL_TEMPLATE`
  - `ALARM_EMAIL_TEMPLATE_FILE`
- 
+
 #### Slack target settings
  - `ALARM_SLACK_WEBHOOK_URL`
  - `ALARM_SLACK_CHANNEL`
  - `ALARM_SLACK_BOTNAME`
  - `ALARM_SLACK_TEMPLATE`
  - `ALARM_SLACK_TEMPLATE_FILE`
- 
+
+#### Hipchat target settings
+ - `ALARM_HIPCHAT_WEBHOOK_URL`
+ - `ALARM_HIPCHAT_NOTIFY`
+ - `ALARM_HIPCHAT_TEMPLATE`
+ - `ALARM_HIPCHAT_TEMPLATE_FILE`
+
+#### GRAPHITE target settings
+ - `ALARM_GRAPHITE_WEBHOOK_URL`
+ - `ALARM_GRAPHITE_TAG`
+ - `ALARM_GRAPHITE_TEMPLATE`
+ - `ALARM_GRAPHITE_TEMPLATE_FILE`
+
 See [examples](https://github.com/ndelitski/rancher-alarms/tree/master/examples) using environment config in docker-compose files
 
 ### Local json config
@@ -160,7 +174,17 @@ See [examples](https://github.com/ndelitski/rancher-alarms/tree/master/examples)
             "webhookUrl": "https://hooks.slack.com/services/YOUR_SLACK_UUID",
             "botName": "rancher-alarm",
             "channel": "#devops"
-        }
+        },
+        "hipchat": {
+            "webhookUrl": "https://triberhr.hipchat.com/v2/room/YOUR_ROOM_ID/notification?auth_token=YOUR_HIPCHAT_TOKEN",
+            "notify": "true"
+        },
+        "graphite": {
+            "webhookUrl": "http://graphite/events/",
+            "botName": "alarm",
+            "GraphiteLogin": "guest",
+            "GraphitePass": "guest"
+          }
     }
 }
 ```

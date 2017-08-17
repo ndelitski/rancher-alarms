@@ -1,0 +1,11 @@
+# Send GRAPHITE notifications with using full list of sutomization parameters
+rancher-alarms:
+  image: ndelitski/rancher-alarms
+  environment:
+    ALARM_GRAPHITE_WEBHOOK_URL: http://graphite/events/
+    ALARM_GRAPHITE_TAG: "alerts,rancher"
+    ALARM_GRAPHITE_LOGIN: "guest"
+    ALARM_GRAPHITE_PASS: "guest"
+  labels:
+    io.rancher.container.create_agent: true
+    io.rancher.container.agent.role: environment

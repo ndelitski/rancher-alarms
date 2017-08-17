@@ -31,3 +31,4 @@ node_modules
 config.json
 dist
 docker-compose.yml
+.DS_Store
